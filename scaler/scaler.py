@@ -122,7 +122,9 @@ class Key():
 
         print('-'*43)
 
-        print('|', end='')
+        degrees = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
+        deg_list = []
+        typ_list = []
         for i in range(0, 7):
             lowT = Enharmonic.interval(
                 Enharmonic.toIndex(self.triad_scale[i][0]),
@@ -138,20 +140,36 @@ class Key():
             if low == 3:
                 if high == 3:
                     typ = 'd'
+                    deg = degrees[i].lower() + '°'
                 elif high == 4:
                     typ = 'm'
+                    deg = degrees[i].lower()
             elif low == 4:
                 if high == 3:
                     typ = 'M'
+                    deg = degrees[i].upper()
                 elif high == 4:
                     typ = 'A'
+                    deg = degrees[i].upper() + '+'
 
             if typ == 'undef':
                 print(low, high)
 
-            print(' {:3s}{}'.format(self.triad_scale[i][0], typ), end='|',
+            typ_list.append(typ)
+            deg_list.append(deg)
+
+
+        print('|', end='')
+        for i in range(0, 7):
+            print(' {:3s}{}'.format(self.triad_scale[i][0], typ_list[i]), end='|',
                   flush=True)
 
+        print('', flush=True)
+        print('|', end='')
+
+        for i in range(0, 7):
+            print(' {:4s}'.format(deg_list[i]), end='|',
+                  flush=True)
         print('', flush=True)
 
     def isMinor(self):
