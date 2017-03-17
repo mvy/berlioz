@@ -28,7 +28,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 # 0 = C
 
-pitchSet = 'CDEFGAB'
 
 scale_division = {}
 scale_division[Modes.Major] = [2, 2, 1, 2, 2, 2, 1]
@@ -51,19 +50,6 @@ scaleChords[Modes.MelodicMinor] = [Chords.Minor, Chords.Diminished,
                                    Chords.Major, Chords.Minor, Chords.Minor, 
                                    Chords.Major, Chords.Major]
 
-
-diatonic = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-rdiatonic = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
-
-dflatEnharmonics = ['Dbb', 'Db', 'Ebb', 'Eb', 'Fb', 'Gbb', 'Gb', 'Abb', 'Ab',
-                    'Bbb', 'Bb', 'Cb']
-flatEnharmonics  = ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 
-                    'Bb', 'Cb']
-sharpEnharmonics = ['B#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'G', 'G#', 'A',
-                    'A#', 'B']
-
-
-
 class Key():
     keys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 
             'Cb', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F']
@@ -71,19 +57,26 @@ class Key():
              'Ab', 'Eb', 'Bb', 'F', 'C', 'G', 'D']
 
     def __init__(self, key_signature, mode):
+        '''Key constructor. Checks the signature and generate scales'''
         Key.keyCheck(key_signature)
         self.signature = key_signature
         self.mode = mode
 
-        # build enharmonic scale
+        self.buildEnharmonicScale()
+        self.buildHarmonicScale()
+
+        self.buildTriadScale()
+        self.buildDegreeScale()
+
+    def buildEnharmonicScale(self):
         enharmonic_root = Enharmonic.toIndex(self.getName())
         self.enharmonic_scale = [enharmonic_root]
         offset = 0
         for i in range(0, 6):
-            offset += scale_division[mode][i]
+            offset += scale_division[self.mode][i]
             self.enharmonic_scale.append((enharmonic_root + offset) % 12)
-        
-        # build harmonic scale
+
+    def buildHarmonicScale(self):
         tonic_order = Enharmonic.toOrder(self.getName())
         self.harmonic_scale = []
         self.triad_scale = []
@@ -92,39 +85,16 @@ class Key():
                 Enharmonic.toNote(self.enharmonic_scale[i], (i +
                                   tonic_order) % 7))
 
-        # build triad scale
+    def buildTriadScale(self):
         for i in range(1, 8):
             self.triad_scale.append(self.buildTriad(i))
 
-
-
-    def getEnharmonicScale(self):
-        return self.enharmonic_scale
-
-    def getHarmonicScale(self):
-        return self.harmonic_scale
-
-    def getChordScale(self):
-        return self.triad_scale
-
-    def ppChordScale(self):
-        print('-'*43)
-        for i in range(2, -1, -1):
-            print('| {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} |'.format(
-                self.triad_scale[0][i],
-                self.triad_scale[1][i],
-                self.triad_scale[2][i],
-                self.triad_scale[3][i],
-                self.triad_scale[4][i],
-                self.triad_scale[5][i],
-                self.triad_scale[6][i]))
-
-
-        print('-'*43)
-
+    def buildDegreeScale(self):
         degrees = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
+        self.degree_scale= []
         deg_list = []
         typ_list = []
+
         for i in range(0, 7):
             lowT = Enharmonic.interval(
                 Enharmonic.toIndex(self.triad_scale[i][0]),
@@ -140,7 +110,7 @@ class Key():
             if low == 3:
                 if high == 3:
                     typ = 'd'
-                    deg = degrees[i].lower() + '°'
+                    deg = degrees[i].lower() + u'\xb0'
                 elif high == 4:
                     typ = 'm'
                     deg = degrees[i].lower()
@@ -155,24 +125,64 @@ class Key():
             if typ == 'undef':
                 print(low, high)
 
-            typ_list.append(typ)
-            deg_list.append(deg)
+            self.degree_scale.append((typ, deg))
 
+    def getEnharmonicScale(self):
+        '''Returns the scale with enharmonic index'''
+        return self.enharmonic_scale
+
+    def getHarmonicScale(self):
+        '''Returns the scale with note names'''
+        return self.harmonic_scale
+
+    def getChordScale(self):
+        '''Returns '''
+        return self.triad_scale
+
+    def ppChordScale(self):
+        '''Pretty-prints the chord scale'''
+        print('-'*43)
+        # Scale
+        for i in range(2, -1, -1):
+            print('| {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} |'.format(
+                self.triad_scale[0][i],
+                self.triad_scale[1][i],
+                self.triad_scale[2][i],
+                self.triad_scale[3][i],
+                self.triad_scale[4][i],
+                self.triad_scale[5][i],
+                self.triad_scale[6][i]))
+
+
+        print('-'*43)
+        # Chords
+        
 
         print('|', end='')
         for i in range(0, 7):
-            print(' {:3s}{}'.format(self.triad_scale[i][0], typ_list[i]), end='|',
+            print(' {:3s}{}'.format(self.triad_scale[i][0],
+                                    self.degree_scale[i][0]), end='|', 
                   flush=True)
 
         print('', flush=True)
         print('|', end='')
 
         for i in range(0, 7):
-            print(' {:4s}'.format(deg_list[i]), end='|',
+            print(' {:4s}'.format(self.degree_scale[i][1]), end='|',
                   flush=True)
         print('', flush=True)
+
+    def getCircleProgression(self):
+        progression = []
+        curr = 0
+        for i in range(0, 7):
+            progression.append((self.degree_scale[curr % 7][1]))
+            curr += 3
+
+        return progression
 
     def isMinor(self):
+        '''Returns True if key is minor'''
         return Modes.isMinor(self.mode)
 
     def getName(self):
@@ -183,13 +193,24 @@ class Key():
             return Key.keys[self.signature]
 
     def degreeOf(self, note_name):
+        '''Returns the degree of a note'''
         if note_name in harmonic_scale:
             return harmonic_scale.index(note_name) + 1
 
     def buildTriad(self, degree):
+        '''Builds a triad for degree in the key'''
         return [self.harmonic_scale[(degree - 1) % 7],
                 self.harmonic_scale[(degree - 1 + 2) % 7], 
                 self.harmonic_scale[(degree - 1 + 4) % 7]]
+
+    def print(self):
+        print('Key : ', self.getName(), 'm' if self.isMinor() else '')
+        #print('Scale : ', self.getEnharmonicScale())
+        print('Scale : ', self.getHarmonicScale())
+        print('Chords')
+        self.ppChordScale()
+        print('Circle : ', self.getCircleProgression())
+
 
     @staticmethod
     def keyCheck(key_signature):
@@ -302,8 +323,6 @@ class Enharmonic():
 
 if __name__ == '__main__':
     #for i in range(-7, 8):
-    k = Key(2, Modes.Major)
-    print(k.getName())
-    print(k.getEnharmonicScale())
-    print(k.getHarmonicScale())
-    k.ppChordScale()
+    for m in Modes:
+        k = Key(-2, m)
+        k.print()
