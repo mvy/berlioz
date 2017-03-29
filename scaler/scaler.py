@@ -141,36 +141,38 @@ class Key():
 
     def ppChordScale(self):
         '''Pretty-prints the chord scale'''
-        print('-'*43)
+        r = ''
+        r += '-'*43
+        r += '\n'
         # Scale
         for i in range(2, -1, -1):
-            print('| {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} |'.format(
+            r += '| {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} | {:3s} |\n'.format(
                 self.triad_scale[0][i],
                 self.triad_scale[1][i],
                 self.triad_scale[2][i],
                 self.triad_scale[3][i],
                 self.triad_scale[4][i],
                 self.triad_scale[5][i],
-                self.triad_scale[6][i]))
+                self.triad_scale[6][i])
 
 
-        print('-'*43)
+        r += '\n'
+        r += '-'*43
         # Chords
         
 
-        print('|', end='')
+        r += '\n'
+        r += '|'
         for i in range(0, 7):
-            print(' {:3s}{}'.format(self.triad_scale[i][0],
-                                    self.degree_scale[i][0]), end='|', 
-                  flush=True)
-
-        print('', flush=True)
-        print('|', end='')
-
+            r += ' {:3s}{}|'.format(self.triad_scale[i][0],
+                                    self.degree_scale[i][0])
+        r += '\n'
+        r += '|'
         for i in range(0, 7):
-            print(' {:4s}'.format(self.degree_scale[i][1]), end='|',
-                  flush=True)
-        print('', flush=True)
+            r += ' {:4s}|'.format(self.degree_scale[i][1])
+        r += '\n'
+
+        return r
 
     def getCircleProgression(self):
         progression = []
@@ -276,6 +278,10 @@ class Enharmonic():
             return Enharmonic.sharp.index(note_name)
         elif note_name in Enharmonic.flat:
             return Enharmonic.flat.index(note_name)
+        elif note_name in Enharmonic.dflat:
+            return Enharmonic.dflat.index(note_name)
+        elif note_name in Enharmonic.dsharp:
+            return Enharmonic.dsharp.index(note_name)
         else:
             raise Exception("no such note" + str(note_name))
 
@@ -325,4 +331,4 @@ if __name__ == '__main__':
     #for i in range(-7, 8):
     for m in Modes:
         k = Key(-2, m)
-        k.print()
+        print(k.ppChordScale())
