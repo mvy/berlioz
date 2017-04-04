@@ -1,12 +1,26 @@
 import discord
+import datetime
 from discord.ext import commands
 import random
+import logging
 from scaler.scaler import (Key, Modes)
 
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
 There are a number of utility commands being showcased here.'''
-bot = commands.Bot(command_prefix='?', description=description)
+bot = commands.Bot(command_prefix='!', description=description)
+
+# Setting up logger
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.CRITICAL)
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+handler = logging.FileHandler(filename='berlioz.log', encoding='utf-8',
+        mode='w')
+log.addHandler(handler)
+
+extensions = [
+]
 
 def wrapCode(text: str):
     return '```' + text + '```'
@@ -17,6 +31,8 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    if not hasattr(bot, 'uptime'):
+        bot.uptime = datetime.datetime.utcnow()
 
 @bot.command()
 async def add(left : int, right : int):
@@ -87,7 +103,14 @@ async def collab(ctx, url):
     await bot.say(ctx.message.channel.id)
 
 
-with open('token', 'r') as f:
-    token = f.readline().strip()
-    bot.run(token)
+if __name__ == '__main__':
+    with open('token', 'r') as f:
+        for extension in extensions:
+            try:
+                bot.load_extension(extension)
+            except Exception as e:
+                print('Failed to load extension {}\n{}: {}'.format(extension,
+                            type(e).__name__, e))
+        token = f.readline().strip()
+        bot.run(token)
 
