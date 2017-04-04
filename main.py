@@ -5,9 +5,7 @@ import random
 import logging
 from scaler.scaler import (Key, Modes)
 
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-There are a number of utility commands being showcased here.'''
+description = '''Bot to manage The Composers Network.'''
 bot = commands.Bot(command_prefix='!', description=description)
 
 # Setting up logger
@@ -20,6 +18,7 @@ handler = logging.FileHandler(filename='berlioz.log', encoding='utf-8',
 log.addHandler(handler)
 
 extensions = [
+    'tcnexts.collab'
 ]
 
 def wrapCode(text: str):
@@ -96,12 +95,6 @@ async def scale(key: int, mode: str):
 
     await bot.say(wrapCode(k.ppChordScale()))
 
-@bot.command(pass_context=True)
-async def collab(ctx, url):
-    print('=====')
-    print(ctx.message.channel)
-    await bot.say(ctx.message.channel.id)
-
 
 if __name__ == '__main__':
     with open('token', 'r') as f:
@@ -111,6 +104,7 @@ if __name__ == '__main__':
             except Exception as e:
                 print('Failed to load extension {}\n{}: {}'.format(extension,
                             type(e).__name__, e))
+                
         token = f.readline().strip()
         bot.run(token)
 
